@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>محاضراتي الذكية | مسجل ومفرّغ المحاضرات الجامعية الذكي</title>
+  
+  <!-- خطوط Google Fonts تدعم العربية بوضوح ممتاز -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS عبر CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            cairo: ['Cairo', 'sans-serif'],
+            readex: ['Readex Pro', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            accent: {
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              purple: '#8b5cf6',
+              rose: '#f43f5e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Marked.js لتنسيق الماركداون والفقرات -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-cairo min-h-screen transition-colors duration-200">
+
+  <!-- شريط التنقل العلوي -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- الشعار والعنوان -->
+      <div class="flex items-center space-x-3 space-x-reverse">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25">
+          <i data-lucide="mic" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold text-slate-900 dark:text-white">محاضراتي الذكية</h1>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-semibold border border-brand-200 dark:border-brand-800">عازل الدوشة AI</span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">تفريغ دقيق للمحاضرات وعزل كلام الطلاب الجانبي</p>
+        </div>
+      </div>
+
+      <!-- الأزرار السريعة -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- زر فتح الإعدادات ومفتاح API -->
+        <button id="btn-open-settings" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all">
+          <i data-lucide="key" class="w-4 h-4 text-brand-600 dark:text-brand-400"></i>
+          <span>مفتاح الذكاء الاصطناعي</span>
+          <span id="api-status-badge" class="w-2 h-2 rounded-full bg-amber-400"></span>
+        </button>
+
+        <!-- زر تجربة عينة سريعة -->
+        <button id="btn-load-demo" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 text-xs font-semibold border border-indigo-200 dark:border-indigo-800 transition-all">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>محاضرة تجريبية</span>
+        </button>
+
+        <!-- تبديل الوضع الليلي -->
+        <button id="btn-theme-toggle" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all" title="تبديل المظهر">
+          <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- شريط تنبيه الأمانة العلمية -->
+    <div class="bg-gradient-to-r from-blue-500/10 via-brand-500/10 to-indigo-500/10 border border-brand-200/60 dark:border-brand-800/60 rounded-xl p-3 sm:p-4 flex items-start gap-3">
+      <div class="p-2 bg-brand-500 text-white rounded-lg shadow-sm flex-shrink-0 mt-0.5">
+        <i data-lucide="shield-check" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+      </div>
+      <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+        <strong class="font-bold text-slate-900 dark:text-white block sm:inline">نظام الأمانة العلمية (Zero Hallucination):</strong>
+        تم برمجة وتوجيه الذكاء الاصطناعي بشكل صارم ليعتمد 100% على ما قاله الدكتور في التسجيل فقط، مع تجاهل همهمات وكلام الطلاب الجانبي ودوشة القاعة، دون اختلاق أو زيادة أي معلومة من خارج المحاضرة.
+      </div>
+    </div>
+
+    <!-- شبكة التحكم والتسجيل -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- العمود الأيمن: أدوات التسجيل والرفع وخيارات الفلترة (5 أعمدة) -->
+      <div class="lg:col-span-5 space-y-5">
+
+        <!-- بطاقة التسجيل والرفع -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-5">
+          
+          <!-- تبويب: رفع ملف المحاضرة (افتراضي) / تسجيل مباشر -->
+          <div class="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-semibold">
+            <button id="tab-upload" class="flex-1 py-2.5 px-3 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm flex items-center justify-center gap-2 transition-all">
+              <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+              <span>رفع تسجيل المحاضرة (حتى 2GB)</span>
+            </button>
+            <button id="tab-record" class="flex-1 py-2.5 px-3 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 flex items-center justify-center gap-2 transition-all">
+              <i data-lucide="mic" class="w-4 h-4"></i>
+              <span>تسجيل مباشر بالمايك</span>
+            </button>
+          </div>
+
+          <!-- لوحة رفع ملف صوتي/فيديو (الافتراضية للملفات الكبيرة) -->
+          <div id="panel-upload" class="space-y-4">
+            <div id="drop-zone" class="border-2 border-dashed border-brand-400 dark:border-brand-600/60 hover:border-brand-600 dark:hover:border-brand-400 rounded-2xl p-7 text-center cursor-pointer transition-all bg-gradient-to-b from-brand-50/40 via-white to-slate-50/50 dark:from-slate-800/40 dark:to-slate-900/40 shadow-inner">
+              <input type="file" id="audio-file-input" accept="audio/*,video/*,.mp3,.wav,.m4a,.aac,.ogg,.webm,.mp4,.mkv,.mov" class="hidden">
+              <div class="flex flex-col items-center gap-2.5">
+                <div class="w-14 h-14 rounded-2xl bg-brand-100 dark:bg-brand-900/60 text-brand-600 dark:text-brand-300 flex items-center justify-center shadow-md shadow-brand-500/20">
+                  <i data-lucide="file-audio" class="w-7 h-7"></i>
+                </div>
+                <div>
+                  <p class="text-sm sm:text-base font-bold text-slate-900 dark:text-white">اضغط لاختيار ملف المحاضرة أو اسحبه إلى هنا</p>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">يدعم ملفات ضخمة حتى <strong class="text-brand-600 dark:text-brand-400 font-bold">2 جيجابايت (2GB)</strong> وتسجيلات تدوم لعدة ساعات</p>
+                </div>
+                <div class="flex flex-wrap items-center justify-center gap-1.5 pt-1">
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">MP3</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">M4A (تسجيل موبايل)</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">WAV</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">AAC</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">MP4 (فيديو المدرج)</span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium">MOV/MKV</span>
+                </div>
+              </div>
+            </div>
+            
+            <div id="uploaded-file-info" class="hidden p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2.5 truncate">
+                <div class="p-1.5 rounded-lg bg-emerald-500 text-white flex-shrink-0">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                </div>
+                <div class="truncate">
+                  <span id="uploaded-file-name" class="font-bold text-slate-900 dark:text-white truncate block">اسم الملف</span>
+                  <span class="text-[11px] text-emerald-700 dark:text-emerald-400">جاهز للتفريغ وعزل دوشة الطلاب</span>
+                </div>
+              </div>
+              <span id="uploaded-file-size" class="font-mono font-bold text-emerald-800 dark:text-emerald-300 bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800 flex-shrink-0 mr-2">0 MB</span>
+            </div>
+          </div>
+
+          <!-- لوحة التسجيل المباشر -->
+          <div id="panel-record" class="space-y-4 hidden">
+            <!-- شاشة المؤقت والرسم البياني للصوت -->
+            <div class="bg-slate-900 rounded-xl p-4 text-white relative overflow-hidden border border-slate-800">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span id="recording-pulse" class="w-3 h-3 rounded-full bg-red-500 animate-pulse hidden"></span>
+                  <span id="recording-status-text" class="text-xs text-slate-400">جاهز للتسجيل</span>
+                </div>
+                <div id="recording-timer" class="font-mono text-xl font-bold tracking-wider text-white">00:00:00</div>
+              </div>
+
+              <!-- رسم الويف فورم الصوتي (Audio Visualizer) -->
+              <canvas id="visualizer-canvas" class="w-full h-20 rounded bg-slate-950/60"></canvas>
+            </div>
+
+            <!-- أزرار التحكم في التسجيل -->
+            <div class="flex items-center justify-center gap-3">
+              <!-- زر بدء/إيقاف التسجيل -->
+              <button id="btn-toggle-record" class="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold flex items-center justify-center gap-2 shadow-lg shadow-red-500/20 active:scale-95 transition-all">
+                <i data-lucide="mic" id="record-icon" class="w-5 h-5"></i>
+                <span id="record-label">بدء تسجيل المحاضرة</span>
+              </button>
+
+              <!-- زر الإيقاف المؤقت -->
+              <button id="btn-pause-record" disabled class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 cursor-not-allowed disabled:opacity-50 transition-all" title="إيقاف مؤقت">
+                <i data-lucide="pause" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- مشغل الصوت الحالي (Audio Preview) -->
+          <div id="audio-preview-container" class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800 hidden">
+            <div class="flex items-center justify-between text-xs text-slate-500">
+              <span class="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300">
+                <i data-lucide="headphones" class="w-3.5 h-3.5"></i>
+                معاينة الصوت المسجل
+              </span>
+              <span id="audio-duration-display">00:00</span>
+            </div>
+            <audio id="audio-element" controls class="w-full h-10 rounded-lg"></audio>
+          </div>
+
+          <!-- إعدادات التصفية الذكية وعزل الدوشة -->
+          <div class="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                <i data-lucide="sliders" class="w-3.5 h-3.5 text-brand-600"></i>
+                خيارات تصفية الصوت الذكية
+              </span>
+            </div>
+
+            <!-- خيار فلتر القاعات الدراسية وعزل الطلاب -->
+            <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 transition-all">
+              <input type="checkbox" id="chk-hall-filter" checked class="mt-1 rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+              <div class="text-xs space-y-0.5">
+                <span class="font-bold text-slate-800 dark:text-slate-200 block">وضع القاعات الكبيرة (عزل كلام الطلاب والهمهمة)</span>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                  يضبط ترددات التقاط الصوت لعزل صوت الطلاب في الخلفية، صدى القاعة، وهدير التكييف عبر فلاتر DSP صوتية متخصصة.
+                </p>
+              </div>
+            </label>
+
+            <!-- خيار تعزيز صوت المحاضر -->
+            <label class="flex items-start gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/40 cursor-pointer hover:bg-slate-100/70 transition-all">
+              <input type="checkbox" id="chk-boost-voice" checked class="mt-1 rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+              <div class="text-xs space-y-0.5">
+                <span class="font-bold text-slate-800 dark:text-slate-200 block">تعزيز ترددات صوت المحاضر (Speech Formant Lift)</span>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                  رفع وضوح مخارج الحروف والمصطلحات العلمية لضمان عدم ضياع أي كلمة ينطقها الدكتور.
+                </p>
+              </div>
+            </label>
+
+            <!-- إعدادات لغة وتنسيق المحاضرة -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">لهجة / لغة المحاضرة:</label>
+                <select id="select-dialect" class="w-full text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-2 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                  <option value="egyptian_scientific" selected>عامية مصرية + مصطلحات علمية</option>
+                  <option value="egyptian">عامية مصرية خالصة</option>
+                  <option value="fusha">لغة عربية فصحى</option>
+                  <option value="auto">اكتشاف تلقائي للهجة</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">نوع التنسيق المطلوب:</label>
+                <select id="select-format-style" class="w-full text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-2 focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                  <option value="comprehensive" selected>شامل (عناوين + شرح + تنبيهات)</option>
+                  <option value="structured">مذكرة دراسية مركزة</option>
+                  <option value="verbatim">تفريغ حرفي كامل فقط</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- زر تشغيل المعالجة بالذكاء الاصطناعي -->
+          <button id="btn-process-transcribe" disabled class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-500 hover:to-indigo-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>إزالة الدوشة وتفريغ المحاضرة الآن</span>
+          </button>
+
+          <!-- شريط حالة المعالجة -->
+          <div id="processing-progress-box" class="hidden p-3.5 rounded-xl bg-brand-50 dark:bg-brand-950/60 border border-brand-200 dark:border-brand-900 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span id="processing-stage-text" class="font-semibold text-brand-700 dark:text-brand-300 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-brand-600 animate-ping"></span>
+                جاري تصفية الضوضاء وعزل صوت الدكتور...
+              </span>
+              <span id="processing-pct" class="font-mono font-bold text-brand-600 dark:text-brand-400">0%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="progress-bar-fill" class="bg-gradient-to-r from-brand-500 to-indigo-600 h-full w-0 transition-all duration-300"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- بطاقة إحصائيات سريعة للمحاضرة -->
+        <div id="lecture-stats-card" class="hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+          <h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-1.5">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-500"></i>
+            إحصائيات التسجيل والتفريغ
+          </h3>
+          <div class="grid grid-cols-3 gap-2 text-center">
+            <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60">
+              <div id="stat-duration" class="font-bold text-sm text-slate-800 dark:text-slate-200">00:00</div>
+              <div class="text-[10px] text-slate-500">مدة التسجيل</div>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60">
+              <div id="stat-words" class="font-bold text-sm text-brand-600 dark:text-brand-400">0</div>
+              <div class="text-[10px] text-slate-500">عدد الكلمات</div>
+            </div>
+            <div class="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/60">
+              <div id="stat-read-time" class="font-bold text-sm text-emerald-600 dark:text-emerald-400">0 دقيقة</div>
+              <div class="text-[10px] text-slate-500">وقت القراءة</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- العمود الأيسر: عرض النتائج، التنسيق، التصدير، والبحث (7 أعمدة) -->
+      <div class="lg:col-span-7 space-y-4">
+
+        <!-- بطاقة النتائج الرئيسية -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col min-h-[620px] overflow-hidden">
+          
+          <!-- رأس البطاقة: التبويبات وأزرار التصدير -->
+          <div class="p-3 sm:p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+            
+            <!-- تبويبات العرض -->
+            <div class="flex items-center gap-1 sm:gap-2">
+              <button id="tab-res-formatted" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-brand-600 text-white shadow-sm flex items-center gap-1.5 transition-all">
+                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                <span>التفريغ المنسق والذكي</span>
+              </button>
+              <button id="tab-res-verbatim" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-all">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span>التفريغ الحرفي (كلمة بكلمة)</span>
+              </button>
+              <button id="tab-res-exam" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-all">
+                <i data-lucide="target" class="w-3.5 h-3.5 text-amber-500"></i>
+                <span>تنبيهات الدكتور للامتحان</span>
+              </button>
+            </div>
+
+            <!-- أزرار التصدير والنسخ -->
+            <div class="flex items-center gap-1 sm:gap-2">
+              <!-- بحث في التفريغ -->
+              <div class="relative">
+                <input type="text" id="search-input" placeholder="بحث في المحاضرة..." class="w-28 sm:w-36 text-xs p-1.5 pr-7 pl-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:outline-none focus:ring-1 focus:ring-brand-500">
+                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute right-2 top-2"></i>
+              </div>
+
+              <!-- زر نسخ النص -->
+              <button id="btn-copy-text" title="نسخ المكتوب" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-all">
+                <i data-lucide="copy" class="w-4 h-4"></i>
+              </button>
+
+              <!-- زر تنزيل Word -->
+              <button id="btn-export-word" title="تنزيل كملف Word" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-brand-600 dark:text-brand-400 transition-all flex items-center gap-1 text-xs font-semibold">
+                <i data-lucide="file-down" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Word</span>
+              </button>
+
+              <!-- زر الطباعة أو PDF -->
+              <button id="btn-export-pdf" title="طباعة أو حفظ PDF" class="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400 transition-all flex items-center gap-1 text-xs font-semibold">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">PDF</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- مساحة العرض الرئيسية -->
+          <div class="p-5 sm:p-6 flex-1 overflow-y-auto max-h-[680px] prose dark:prose-invert max-w-none text-slate-800 dark:text-slate-200" id="results-display-area">
+            
+            <!-- الحالة الافتراضية (قبل التسجيل أو التفريغ) -->
+            <div id="empty-state" class="h-full flex flex-col items-center justify-center text-center py-16 space-y-4">
+              <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center text-slate-400 dark:text-slate-500">
+                <i data-lucide="mic-off" class="w-8 h-8"></i>
+              </div>
+              <div class="max-w-md space-y-1.5">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">لا يوجد تفريغ حالياً</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                  ابدأ تسجيل المحاضرة مباشرة من المايك أو ارفع تسجيلاً قديماً من هاتفك، وسيقوم الذكاء الاصطناعي بتصفية الدوشة وعزل كلام الدكتور وتنظيم المحاضرة فوراً.
+                </p>
+              </div>
+              <button id="btn-trigger-sample-empty" class="text-xs text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 font-semibold">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i>
+                اضغط هنا لتجربة نموذج محاضرة جامعية جاهزة
+              </button>
+            </div>
+
+            <!-- عرض التفريغ المنسق والذكي -->
+            <div id="content-formatted" class="hidden space-y-4">
+              <!-- سيتم ملؤه ديناميكياً بواسطة JavaScript -->
+            </div>
+
+            <!-- عرض التفريغ الحرفي -->
+            <div id="content-verbatim" class="hidden space-y-3 font-mono text-xs sm:text-sm">
+              <!-- سيتم ملؤه ديناميكياً بواسطة JavaScript -->
+            </div>
+
+            <!-- عرض تنبيهات الامتحان والأسئلة -->
+            <div id="content-exam" class="hidden space-y-4">
+              <!-- سيتم ملؤه ديناميكياً بواسطة JavaScript -->
+            </div>
+
+          </div>
+
+          <!-- شريط سفلي: تأكيد الأمانة العلمية والطوابع -->
+          <div class="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="shield" class="w-3.5 h-3.5 text-emerald-500"></i>
+              <span>مضمون بدون هلوسة أو كلام خارجي</span>
+            </span>
+            <span id="transcription-model-badge" class="font-mono bg-slate-200 dark:bg-slate-800 px-2 py-0.5 rounded text-[10px]">
+              Gemini Audio Isolation
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ميزات النظام وكيف يعمل في الجامعات والقاعات -->
+    <section class="mt-8 border-t border-slate-200 dark:border-slate-800 pt-8">
+      <h2 class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+        <i data-lucide="cpu" class="w-5 h-5 text-brand-600"></i>
+        كيف يتعامل الموقع مع دوشة المدرجات وكلام الطلاب؟
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">1</div>
+          <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">تصفية الترددات (DSP Filters)</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            يتم تمرير الصوت على فلاتر تقطع اهتزازات البنجات وصوت التكييف (100Hz Low-cut)، وتلغي طنين الكهرباء، وترفع ترددات صوت المحاضر.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">2</div>
+          <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">عزل كلام الطلاب (Speaker Diarization)</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            الذكاء الاصطناعي مدرب على تمييز صوت المحاضر الرئيسي (المستمر في الشرح) وتجاهل الأصوات الجانبية كضحك الطلاب أو الهمسات السريعة.
+          </p>
+        </div>
+        <div class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
+          <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold">3</div>
+          <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">تنسيق الكلام المتداخل في نقاط واضحة</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            عندما يتحدث الدكتور بالعامية المصرية ويخلطها بمصطلحات إنجليزية، يعيد النظام صياغة الشرح في نقاط دراسية مرتبة دون تغيير المعنى.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- نافذة منبثقة: إعدادات مفتاح الذكاء الاصطناعي (API Settings Modal) -->
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-brand-100 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 rounded-lg">
+            <i data-lucide="key" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">إعدادات مفتاح الذكاء الاصطناعي</h3>
+        </div>
+        <button id="btn-close-settings" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed space-y-2">
+        <p>
+          يستخدم الموقع تقنية <strong>Gemini Multimodal Audio</strong> لتحليل الصوت المعقد وتصفية دوشة المحاضرات بجودة فائقة.
+        </p>
+        <p class="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300">
+          💡 يمكنك الحصول على مفتاح مجاني تماماً من موقع 
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="underline font-bold hover:text-amber-900">Google AI Studio</a>.
+          يتم حفظ المفتاح بأمان داخل متصفحك فقط ولا يُرسل لأي خادم وسيط.
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">مفتاح Google Gemini API Key:</label>
+          <input type="password" id="input-api-key" placeholder="AIzaSy..." class="w-full text-xs font-mono p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300">الموديل المفضل:</label>
+            <button type="button" id="btn-fetch-models" class="text-[11px] text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 font-semibold">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+              <span>فحص النماذج المتاحة لمفتاحك</span>
+            </button>
+          </div>
+          <select id="select-model" class="w-full text-xs font-medium rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 p-2.5 focus:ring-2 focus:ring-brand-500">
+            <option value="gemini-2.0-flash" selected>Gemini 2.0 Flash (النموذج الأحدث والأسرع - موصى به)</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash (مستقر ومثالي للتسجيلات الطويلة)</option>
+            <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite (خفيف وفائق السرعة)</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro (أعلى دقة للمحاضرات المعقدة)</option>
+          </select>
+          <div id="models-fetch-status" class="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 hidden"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="btn-save-settings" class="w-full py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-md transition-all">
+          حفظ وتفعيل
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- حاوية إشعارات Toast السريعة -->
+  <div id="toast-container" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- سكربتات التطبيق الشاملة -->
+  <script src="bundle.js"></script>
+</body>
+</html>
